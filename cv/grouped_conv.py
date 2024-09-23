@@ -2,6 +2,8 @@ import torch
 from torch import nn
 import numpy as np
 
+# Note: In CNNs, the number of filters used in a single convlayer is equal to the number of output channels when it is applied to some input feature map
+# This is because convolutions are done along the spatial dimension of a feature map
 
 torch.manual_seed(2000)
 
