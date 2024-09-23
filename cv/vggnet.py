@@ -60,20 +60,21 @@ class VGGNet(nn.Module):
 
     def add(self, arch, prev):
         if arch != 'M':
-            self.layers.append(nn.Conv2d(in_channels=prev, out_channels=arch, kernel_size=(3,3), stride=(1, 1), padding=1))
+            self.layers.append(nn.Conv2d(in_channels=prev, out_channels=arch, kernel_size=(3, 3), stride=(1, 1), padding=1))
             #self.layers.append(nn.BatchNorm2d(arch))
             self.layers.append(nn.ReLU(True))
         else:
             self.layers.append(nn.MaxPool2d(2, 2))
         
     def forward(self, x):
+        print("input shape: {}".format(x.size()))
         output = self.pipeline(x)
-        print("output shape: {}".format(output.shape))
+        print("output shape: {}".format(output.size()))
         class_probs = self.fcs(output.reshape(output.shape[0], -1))
         return class_probs
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = VGGNet(in_channels=3)
+model = VGGNet(in_channels=3).to(device)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=HP.LR, momentum=HP.MOMENTUM)
 loss_fn = torch.nn.NLLLoss()
@@ -91,8 +92,7 @@ for epoch in tqdm(range(1, 5)):
         #print(f"one hot encoded expected classes: {one_hot}, {one_hot.size()}")
         #print(f"output probabilities tensor: {output}, {output.size()}")
 
-        if torch.equal(expected_classes, label):
-            accuracy += 1
+        accuracy += (expected_classes == label).sum().item()
 
         loss_val = loss_fn(output, label)
         loss_val.backward()
